@@ -3,7 +3,7 @@ import com.thomas.medicatieinnameapp.model.Gebruiker;
 import com.thomas.medicatieinnameapp.repository.GebruikerRepository;
 import org.springframework.stereotype.Service;
 
-
+//comment toegevoegd voor aanmaken pull request
 
 import java.util.List;
 import java.util.Optional;
