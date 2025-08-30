@@ -1,35 +1,67 @@
 package com.thomas.medicatieinnameapp.model;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+
+import jakarta.persistence.*;
 
 @Entity
+@Table(name = "gebruikers")
 public class Gebruiker {
+
+    public Gebruiker() {
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String voornaam;
-    private String achternaam;
+
+    @Column(nullable = false)
+    private String naam;
+
+    @Column(nullable = false)
     private String email;
 
-    public String getVoornaam() {
-        return voornaam;
-         }
-    public void setVoornaam(String voornaam) {
-        this.voornaam = voornaam;
+    @Column(nullable = false)
+    private String wachtwoord;
+
+    @Enumerated(EnumType.STRING)
+    private Rol rol;
+
+    public Long getId() {
+        return id;
     }
-    public String getAchternaam() {
-        return achternaam;
+
+    public void setId(Long id) {
+        this.id = id;
     }
-    public void setAchternaam(String achternaam) {
-        this.achternaam = achternaam;
+
+    public String getNaam() {
+        return naam;
     }
+
+    public void setNaam(String naam) {
+        this.naam = naam;
+    }
+
     public String getEmail() {
         return email;
     }
+
     public void setEmail(String email) {
         this.email = email;
     }
 
+    public String getWachtwoord() {
+        return wachtwoord;
+    }
+
+    public void setWachtwoord(String wachtwoord) {
+        this.wachtwoord = wachtwoord;
+    }
+
+    public Rol getRol() {
+        return rol;
+    }
+
+    public void setRol(Rol rol) {
+        this.rol = rol;
+    }
 }
