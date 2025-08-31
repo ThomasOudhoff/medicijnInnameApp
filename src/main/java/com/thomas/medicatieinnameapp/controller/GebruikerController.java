@@ -2,6 +2,7 @@ package com.thomas.medicatieinnameapp.controller;
 
 import com.thomas.medicatieinnameapp.dto.GebruikerCreateRequest;
 import com.thomas.medicatieinnameapp.dto.GebruikerResponse;
+import com.thomas.medicatieinnameapp.dto.GebruikerUpdateRequest;
 import com.thomas.medicatieinnameapp.mapper.GebruikerMapper;
 import com.thomas.medicatieinnameapp.model.Gebruiker;
 import com.thomas.medicatieinnameapp.service.GebruikerService;
@@ -55,5 +56,22 @@ public class GebruikerController {
         GebruikerResponse body = GebruikerMapper.toResponse(saved);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
+    }
+    @PutMapping("/{id}")
+    public ResponseEntity<GebruikerResponse> updateGebruiker(
+            @PathVariable Long id,
+            @Valid @RequestBody GebruikerUpdateRequest req) {
+
+        var bijgewerkt = gebruikerService.updateGebruiker(id, req);
+        var resp = mapToGebruikerResponse(bijgewerkt);
+        return ResponseEntity.ok(resp);
+    }
+    private GebruikerResponse mapToGebruikerResponse(Gebruiker gebruiker) {
+        GebruikerResponse resp = new GebruikerResponse();
+        resp.setId(gebruiker.getId());
+        resp.setNaam(gebruiker.getNaam());
+        resp.setEmail(gebruiker.getEmail());
+        resp.setRol(gebruiker.getRol());
+        return resp;
     }
 }

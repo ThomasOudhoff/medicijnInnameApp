@@ -1,7 +1,11 @@
 package com.thomas.medicatieinnameapp.repository;
 import com.thomas.medicatieinnameapp.model.Gebruiker;
 import org.springframework.data.jpa.repository.JpaRepository;
-public interface GebruikerRepository extends JpaRepository<Gebruiker, Long> {
 
+import java.util.Optional;
+
+public interface GebruikerRepository extends JpaRepository<Gebruiker, Long> {
+    Optional<Gebruiker> findByEmailIgnoreCase(String email);
+    boolean existsByEmailIgnoreCaseAndIdNot(String email, Long id);
 
 }
