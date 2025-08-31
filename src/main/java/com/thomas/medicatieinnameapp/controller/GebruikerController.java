@@ -74,4 +74,9 @@ public class GebruikerController {
         resp.setRol(gebruiker.getRol());
         return resp;
     }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteGebruiker(@PathVariable Long id) {
+        gebruikerService.deleteGebruiker(id);
+        return ResponseEntity.noContent().build(); // 204
+    }
 }

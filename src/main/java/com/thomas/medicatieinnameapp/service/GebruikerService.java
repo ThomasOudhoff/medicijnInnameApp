@@ -24,6 +24,10 @@ public class GebruikerService {
         return gebruikerRepository.findById(id);
     }
 
+    public List<Gebruiker> getAllGebruikers() { return gebruikerRepository.findAll(); }
+
+    public Gebruiker saveGebruiker(Gebruiker g) { return gebruikerRepository.save(g); }
+
     public Gebruiker getByIdOrThrow(Long id) {
         return gebruikerRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Gebruiker niet gevonden: " + id));
@@ -47,6 +51,11 @@ public class GebruikerService {
 
         return gebruikerRepository.save(g);
     }
-    public List<Gebruiker> getAllGebruikers() { return gebruikerRepository.findAll(); }
-    public Gebruiker saveGebruiker(Gebruiker g) { return gebruikerRepository.save(g); }
+    @Transactional
+    public void deleteGebruiker(Long id) {
+        if (!gebruikerRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Gebruiker niet gevonden");
+        }
+        gebruikerRepository.deleteById(id);
+    }
 }
