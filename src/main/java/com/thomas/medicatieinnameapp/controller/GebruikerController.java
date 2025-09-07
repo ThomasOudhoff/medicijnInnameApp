@@ -1,10 +1,9 @@
 package com.thomas.medicatieinnameapp.controller;
 
-import com.thomas.medicatieinnameapp.dto.GebruikerCreateRequest;
-import com.thomas.medicatieinnameapp.dto.GebruikerResponse;
-import com.thomas.medicatieinnameapp.dto.GebruikerUpdateRequest;
+import com.thomas.medicatieinnameapp.dto.*;
 import com.thomas.medicatieinnameapp.mapper.GebruikerMapper;
 import com.thomas.medicatieinnameapp.model.Gebruiker;
+import com.thomas.medicatieinnameapp.model.Medicatie;
 import com.thomas.medicatieinnameapp.service.GebruikerService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -78,5 +77,30 @@ public class GebruikerController {
     public ResponseEntity<Void> deleteGebruiker(@PathVariable Long id) {
         gebruikerService.deleteGebruiker(id);
         return ResponseEntity.noContent().build(); // 204
+    }
+    @PostMapping("/{id}/medicatie")
+    public ResponseEntity<MedicatieResponse> voegMedicatieToe(
+            @PathVariable Long id,
+            @Valid @RequestBody MedicatieCreateRequest req) {
+
+        Medicatie m = new Medicatie();
+        m.setNaamMedicijn(req.getNaam());
+
+        var opgeslagen = gebruikerService.voegMedicatieToeAanGebruiker(id, m);
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapToMedicatieResponse(opgeslagen));
+    }
+
+    @GetMapping("/{id}/medicatie")
+    public ResponseEntity<java.util.List<MedicatieResponse>> lijstMedicaties(@PathVariable Long id) {
+        var lijst = gebruikerService.getMedicatiesVoorGebruiker(id)
+                .stream().map(this::mapToMedicatieResponse).toList();
+        return ResponseEntity.ok(lijst);
+    }
+    private MedicatieResponse mapToMedicatieResponse(Medicatie m) {
+        MedicatieResponse r = new MedicatieResponse();
+        r.setId(m.getId());
+        r.setNaam(m.getNaamMedicijn());
+        r.setGebruikerId(m.getGebruiker().getId());
+        return r;
     }
 }
