@@ -67,4 +67,5 @@ public class InnameSchemaController {
         r.setFrequentiePerDag(s.getFrequentiePerDag());
         return r;
     }
+    //comment voor pull request
 }
