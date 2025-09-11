@@ -43,4 +43,44 @@ public class MedicatieService {
         }
         medicatieRepository.deleteById(id);
     }
+    public byte[] getBijsluiterFoto(Long id) {
+        var m = getByIdOr404(id);
+        if (m.getBijsluiterFoto() == null || m.getBijsluiterFoto().length == 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Geen bijsluiter-foto opgeslagen");
+        }
+        return m.getBijsluiterFoto();
+    }
+
+    @Transactional
+    public void saveBijsluiterFoto(Long id, byte[] bytes) {
+        if (bytes == null || bytes.length == 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Leeg bestand");
+        }
+        // simpele limiet (5MB)
+        if (bytes.length > 5 * 1024 * 1024) {
+            throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE, "Bestand is te groot (max 5MB)");
+        }
+        var m = getByIdOr404(id);
+        m.setBijsluiterFoto(bytes);
+        // optioneel: m.setBijsluiterUrl(null);
+        medicatieRepository.save(m);
+    }
+
+    @Transactional
+    public void deleteBijsluiterFoto(Long id) {
+        var m = getByIdOr404(id);
+        m.setBijsluiterFoto(null);
+        medicatieRepository.save(m);
+    }
+
+    @Transactional
+    public void setBijsluiterUrl(Long id, String url) {
+        if (url == null || url.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ongeldige URL");
+        }
+        var m = getByIdOr404(id);
+        m.setBijsluiterUrl(url.trim());
+        // optioneel: m.setBijsluiterFoto(null);
+        medicatieRepository.save(m);
+    }
 }
