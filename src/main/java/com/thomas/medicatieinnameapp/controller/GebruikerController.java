@@ -27,7 +27,6 @@ public class GebruikerController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // GET lijst -> altijd DTO's terug (zonder wachtwoord)
     @GetMapping
     public List<GebruikerResponse> getAllGebruikers() {
         return gebruikerService.getAllGebruikers()
@@ -36,7 +35,6 @@ public class GebruikerController {
                 .toList();
     }
 
-    // GET by id -> DTO terug, 404 als niet gevonden
     @GetMapping("/{id}")
     public GebruikerResponse getGebruiker(@PathVariable Long id) {
         // Pas deze regel eventueel aan naar jouw service-signatuur
@@ -45,7 +43,6 @@ public class GebruikerController {
         return GebruikerMapper.toResponse(g);
     }
 
-    // POST -> Request-DTO in, hash wachtwoord, DTO terug (zonder wachtwoord)
     @PostMapping
     public ResponseEntity<GebruikerResponse> createGebruiker(@Valid @RequestBody GebruikerCreateRequest req) {
         Gebruiker entity = GebruikerMapper.toEntity(req);
@@ -66,12 +63,7 @@ public class GebruikerController {
         return ResponseEntity.ok(resp);
     }
     private GebruikerResponse mapToGebruikerResponse(Gebruiker gebruiker) {
-        GebruikerResponse resp = new GebruikerResponse();
-        resp.setId(gebruiker.getId());
-        resp.setNaam(gebruiker.getNaam());
-        resp.setEmail(gebruiker.getEmail());
-        resp.setRol(gebruiker.getRol());
-        return resp;
+        return GebruikerMapper.toResponse(gebruiker);
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGebruiker(@PathVariable Long id) {

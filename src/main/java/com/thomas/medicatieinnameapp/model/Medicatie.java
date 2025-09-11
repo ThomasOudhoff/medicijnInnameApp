@@ -17,11 +17,11 @@ public class Medicatie {
     private String omschrijving;
 
     @Column(name = "bijsluiter_url", length = 255)
-    private String bijsluiterUrl;           // URL als String (komt overeen met DB-kolom)
+    private String bijsluiterUrl;
 
     @Lob
     @Column(name = "bijsluiter_foto")
-    private byte[] bijsluiterFoto;          // Foto als BLOB (byte[]), aparte kolom
+    private byte[] bijsluiterFoto;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "gebruiker_id", nullable = false)
