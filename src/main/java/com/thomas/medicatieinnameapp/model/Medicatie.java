@@ -69,4 +69,11 @@ public class Medicatie {
     public void setGebruiker(Gebruiker gebruiker) {
         this.gebruiker = gebruiker;
     }
+    @OneToOne(mappedBy = "medicatie", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private MedicatieBijsluiter bijsluiter;
+
+    public MedicatieBijsluiter getBijsluiter() {
+        return bijsluiter; }
+    public void setBijsluiter(MedicatieBijsluiter b) {
+        this.bijsluiter = b; }
 }
