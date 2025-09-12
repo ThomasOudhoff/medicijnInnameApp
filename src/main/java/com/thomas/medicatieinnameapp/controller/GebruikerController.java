@@ -8,6 +8,7 @@ import com.thomas.medicatieinnameapp.service.GebruikerService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -34,15 +35,14 @@ public class GebruikerController {
                 .map(GebruikerMapper::toResponse)
                 .toList();
     }
-
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
     @GetMapping("/{id}")
     public GebruikerResponse getGebruiker(@PathVariable Long id) {
-        // Pas deze regel eventueel aan naar jouw service-signatuur
         Gebruiker g = gebruikerService.getGebruikerById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Gebruiker niet gevonden"));
         return GebruikerMapper.toResponse(g);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<GebruikerResponse> createGebruiker(@Valid @RequestBody GebruikerCreateRequest req) {
         Gebruiker entity = GebruikerMapper.toEntity(req);
@@ -53,6 +53,7 @@ public class GebruikerController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
     @PutMapping("/{id}")
     public ResponseEntity<GebruikerResponse> updateGebruiker(
             @PathVariable Long id,
@@ -65,11 +66,13 @@ public class GebruikerController {
     private GebruikerResponse mapToGebruikerResponse(Gebruiker gebruiker) {
         return GebruikerMapper.toResponse(gebruiker);
     }
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGebruiker(@PathVariable Long id) {
         gebruikerService.deleteGebruiker(id);
         return ResponseEntity.noContent().build(); // 204
     }
+
     @PostMapping("/{id}/medicatie")
     public ResponseEntity<MedicatieResponse> voegMedicatieToe(
             @PathVariable Long id,

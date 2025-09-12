@@ -1,9 +1,12 @@
 package com.thomas.medicatieinnameapp.service;
 
 import com.thomas.medicatieinnameapp.dto.InnameSchemaCreateRequest;
+import com.thomas.medicatieinnameapp.dto.InnameSchemaResponse;
 import com.thomas.medicatieinnameapp.dto.InnameSchemaUpdateRequest;
-import com.thomas.medicatieinnameapp.model.*;
-import com.thomas.medicatieinnameapp.repository.*;
+import com.thomas.medicatieinnameapp.model.InnameSchema;
+import com.thomas.medicatieinnameapp.model.Medicatie;
+import com.thomas.medicatieinnameapp.repository.InnameSchemaRepository;
+import com.thomas.medicatieinnameapp.repository.MedicatieRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,14 +18,11 @@ import java.util.List;
 public class InnameSchemaService {
 
     private final InnameSchemaRepository repo;
-    private final GebruikerRepository gebruikerRepo;
     private final MedicatieRepository medicatieRepo;
 
     public InnameSchemaService(InnameSchemaRepository repo,
-                               GebruikerRepository gebruikerRepo,
                                MedicatieRepository medicatieRepo) {
         this.repo = repo;
-        this.gebruikerRepo = gebruikerRepo;
         this.medicatieRepo = medicatieRepo;
     }
 
@@ -32,19 +32,20 @@ public class InnameSchemaService {
     }
 
     @Transactional
-    public InnameSchema create(Long gebruikerId, Long medicatieId, InnameSchemaCreateRequest req) {
-        Gebruiker g = gebruikerRepo.findById(gebruikerId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Gebruiker niet gevonden"));
+    public InnameSchema create(Long medicatieId, InnameSchemaCreateRequest req) {
         Medicatie m = medicatieRepo.findById(medicatieId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Medicatie niet gevonden"));
 
+        if (req.getStartDatum() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "startDatum is verplicht");
+        }
         if (req.getEindDatum() != null && req.getEindDatum().isBefore(req.getStartDatum())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "eindDatum ligt voor startDatum");
         }
 
         InnameSchema s = new InnameSchema();
-        s.setGebruiker(g);
         s.setMedicatie(m);
+        s.setGebruiker(m.getGebruiker()); // eigenaar = eigenaar van medicatie
         s.setStartDatum(req.getStartDatum());
         s.setEindDatum(req.getEindDatum());
         s.setFrequentiePerDag(req.getFrequentiePerDag() != null ? req.getFrequentiePerDag() : 1);
@@ -63,12 +64,24 @@ public class InnameSchemaService {
     @Transactional
     public InnameSchema update(Long id, InnameSchemaUpdateRequest req) {
         InnameSchema s = getByIdOr404(id);
-        if (req.getEindDatum() != null && req.getEindDatum().isBefore(req.getStartDatum())) {
+
+        if (req.getStartDatum() != null) {
+            s.setStartDatum(req.getStartDatum());
+        }
+        if (req.getEindDatum() != null) {
+            s.setEindDatum(req.getEindDatum());
+        }
+        if (req.getFrequentiePerDag() != null) {
+            s.setFrequentiePerDag(req.getFrequentiePerDag());
+        }
+
+        if (s.getStartDatum() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "startDatum mag niet leeg zijn");
+        }
+        if (s.getEindDatum() != null && s.getEindDatum().isBefore(s.getStartDatum())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "eindDatum ligt voor startDatum");
         }
-        s.setStartDatum(req.getStartDatum());
-        s.setEindDatum(req.getEindDatum());
-        s.setFrequentiePerDag(req.getFrequentiePerDag());
+
         return repo.save(s);
     }
 
@@ -78,5 +91,16 @@ public class InnameSchemaService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Schema niet gevonden");
         }
         repo.deleteById(id);
+    }
+
+    public InnameSchemaResponse map(InnameSchema s) {
+        InnameSchemaResponse dto = new InnameSchemaResponse();
+        dto.setId(s.getId());
+        dto.setMedicatieId(s.getMedicatie() != null ? s.getMedicatie().getId() : null);
+        dto.setGebruikerId(s.getGebruiker() != null ? s.getGebruiker().getId() : null);
+        dto.setStartDatum(s.getStartDatum());
+        dto.setEindDatum(s.getEindDatum());
+        dto.setFrequentiePerDag(s.getFrequentiePerDag());
+        return dto;
     }
 }

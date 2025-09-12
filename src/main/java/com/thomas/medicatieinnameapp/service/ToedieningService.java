@@ -32,8 +32,8 @@ public class ToedieningService {
     }
 
     public Toediening getByIdOr404(Long id) {
-        return repo.findById(id).orElseThrow(
-                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Toediening niet gevonden"));
+        return repo.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Toediening niet gevonden"));
     }
 
     @Transactional
@@ -52,7 +52,7 @@ public class ToedieningService {
         if (req.getSchemaId() != null) {
             schema = schemaRepo.findById(req.getSchemaId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Schema niet gevonden"));
-            // extra guard: schema moet naar dezelfde gebruiker/medicatie wijzen
+            // extra guard: schema moet bij dezelfde gebruiker/medicatie horen
             if (!schema.getGebruiker().getId().equals(g.getId()) ||
                     !schema.getMedicatie().getId().equals(m.getId())) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Schema hoort niet bij gebruiker/medicatie");
@@ -72,8 +72,8 @@ public class ToedieningService {
 
     public List<Toediening> listByGebruiker(Long gebruikerId, LocalDate from, LocalDate to) {
         if (from != null && to != null) {
-            var start = from.atStartOfDay();
-            var end = to.atTime(LocalTime.MAX);
+            LocalDateTime start = from.atStartOfDay();
+            LocalDateTime end = to.atTime(LocalTime.MAX);
             return repo.findByGebruiker_IdAndTijdstipBetween(gebruikerId, start, end);
         }
         return repo.findByGebruiker_Id(gebruikerId);
@@ -81,8 +81,8 @@ public class ToedieningService {
 
     public List<Toediening> listByMedicatie(Long medicatieId, LocalDate from, LocalDate to) {
         if (from != null && to != null) {
-            var start = from.atStartOfDay();
-            var end = to.atTime(LocalTime.MAX);
+            LocalDateTime start = from.atStartOfDay();
+            LocalDateTime end = to.atTime(LocalTime.MAX);
             return repo.findByMedicatie_IdAndTijdstipBetween(medicatieId, start, end);
         }
         return repo.findByMedicatie_Id(medicatieId);
