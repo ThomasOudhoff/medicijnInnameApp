@@ -65,3 +65,5 @@ public class Gebruiker {
         this.rol = rol;
     }
 }
+
+//comment toegevoegd om eindresultaat als laatst commit te versturen.
