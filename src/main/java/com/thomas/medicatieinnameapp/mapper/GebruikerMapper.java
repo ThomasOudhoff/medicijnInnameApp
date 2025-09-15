@@ -11,7 +11,7 @@ public final class GebruikerMapper {
         Gebruiker g = new Gebruiker();
         g.setNaam(req.getNaam());
         g.setEmail(req.getEmail());
-        g.setWachtwoord(req.getWachtwoord()); // wordt straks gehasht vóór save
+        g.setWachtwoord(req.getWachtwoord());
         g.setRol(req.getRol());
         return g;
     }

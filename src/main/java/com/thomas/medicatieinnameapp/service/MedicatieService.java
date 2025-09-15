@@ -69,7 +69,6 @@ public class MedicatieService {
         medicatieRepository.deleteById(id);
     }
 
-    // ---------- Bijsluiter (1-op-1) ----------
     public byte[] getBijsluiterFoto(Long medicatieId) {
         MedicatieBijsluiter b = bijsluiterRepo.findById(medicatieId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Geen bijsluiter"));
@@ -99,7 +98,6 @@ public class MedicatieService {
         b.setContentType("application/octet-stream");
         bijsluiterRepo.save(b);
     }
-
     @Transactional
     public void deleteBijsluiterFoto(Long medicatieId) {
         if (!bijsluiterRepo.existsById(medicatieId)) {

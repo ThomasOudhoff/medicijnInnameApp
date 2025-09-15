@@ -16,18 +16,9 @@ import org.springframework.security.config.Customizer;
 public class SecurityConfig {
 
     private final AuthUserDetailsService uds;
-    private final PasswordEncoder passwordEncoder;
 
-    public SecurityConfig(AuthUserDetailsService uds, PasswordEncoder passwordEncoder) {
+    public SecurityConfig(AuthUserDetailsService uds) {
         this.uds = uds;
-        this.passwordEncoder = passwordEncoder;
-    }
-
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(uds);
-        provider.setPasswordEncoder(passwordEncoder); // BCrypt check
-        return provider;
     }
 
     @Bean
@@ -40,8 +31,9 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())
-                .authenticationProvider(authenticationProvider());
+                .userDetailsService(uds);
 
         return http.build();
     }
 }
+

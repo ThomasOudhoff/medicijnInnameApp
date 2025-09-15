@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -98,7 +99,12 @@ public class MedicatieController {
 
         return new ResponseEntity<>(body, headers, HttpStatus.OK);
     }
-
+    @PatchMapping("/{id}/bijsluiter")
+    public ResponseEntity<Void> setBijsluiter(@PathVariable Long id,
+                                              @RequestBody @Validated BijsluiterUrlRequest req) {
+        medicatieService.setBijsluiterUrl(id, req.getUrl());
+        return ResponseEntity.noContent().build();
+    }
     @PreAuthorize("hasRole('ADMIN') or @ownershipLookup.gebruikerIdByMedicatie(#id) == principal.id")
     @DeleteMapping("/{id}/bijsluiter")
     public ResponseEntity<Void> deleteBijsluiter(@PathVariable Long id) {

@@ -28,6 +28,7 @@ public class MedicatieBijsluiter {
 
     @Column(name = "size_bytes")
     private Long sizeBytes;
+
     public MedicatieBijsluiter() {
     }
 
