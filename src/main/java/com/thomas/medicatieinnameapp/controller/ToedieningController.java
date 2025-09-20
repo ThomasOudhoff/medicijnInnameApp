@@ -117,4 +117,17 @@ public class ToedieningController {
         r.setOpmerking(t.getOpmerking());
         return r;
     }
+    @PreAuthorize("""
+    hasRole('ADMIN')
+    or @ownershipLookup.gebruikerIdBySchema(#schemaId) == principal.id
+    or (hasRole('VERZORGER') and @ownershipLookup.isVerzorgerOfSchema(#schemaId, principal.id))
+""")
+    @PostMapping("/api/schema/{schemaId}/toedieningen")
+    public ResponseEntity<ToedieningResponse> createForSchema(
+            @PathVariable Long schemaId,
+            @jakarta.validation.Valid @RequestBody ToedieningCreateRequest req) {
+
+        var t = service.createForSchema(schemaId, req);
+        return ResponseEntity.status(HttpStatus.CREATED).body(map(t));
+    }
 }

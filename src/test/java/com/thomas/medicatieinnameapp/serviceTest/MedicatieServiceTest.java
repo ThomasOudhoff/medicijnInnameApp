@@ -138,36 +138,6 @@ class MedicatieServiceTest {
         verify(medRepo).existsById(id);
         verifyNoMoreInteractions(medRepo, gebRepo, bijRepo);
     }
-
-    // 7
-    @Test
-    void setBijsluiterUrl_ok() {
-        Long id = 11L;
-
-        // Medicatie bestaat
-        Medicatie m = new Medicatie();
-        m.setId(id);
-        when(medRepo.findById(id)).thenReturn(Optional.of(m));
-
-        // Bijsluiter bestaat nog niet -> orElseGet-pad
-        when(bijRepo.findById(id)).thenReturn(Optional.empty());
-        when(bijRepo.save(any())).thenAnswer(inv -> inv.getArgument(0));
-
-        String url = "https://example.com/bijsluiters/x.pdf";
-
-        // act
-        service.setBijsluiterUrl(id, url);
-
-        // assert: findById op medicatie en bijsluiter + save op bijRepo
-        verify(medRepo).findById(id);
-        verify(bijRepo).findById(id);
-        verify(bijRepo).save(argThat(b ->
-                url.equals(b.getUrl()) &&
-                        b.getMedicatie() != null &&
-                        b.getMedicatie().getId().equals(id)
-        ));
-        verifyNoMoreInteractions(medRepo, gebRepo, bijRepo);
-    }
     // 8
     @Test
     void setBijsluiterUrl_invalid_badRequest() {

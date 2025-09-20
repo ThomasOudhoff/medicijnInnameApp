@@ -12,7 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.Customizer;
 
 @Configuration
-@EnableMethodSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     private final AuthUserDetailsService uds;
@@ -31,7 +31,23 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())
-                .userDetailsService(uds);
+                .userDetailsService(uds)
+                .exceptionHandling(e -> e
+                        .authenticationEntryPoint((req, res, ex) -> {
+                            res.setStatus(401);
+                            res.setContentType("application/json");
+                            res.getWriter().write("""
+                        {"error":"401 UNAUTHORIZED","message":"Authentication required","status":401}
+                        """);
+                        })
+                        .accessDeniedHandler((req, res, ex) -> {
+                            res.setStatus(403);
+                            res.setContentType("application/json");
+                            res.getWriter().write("""
+                        {"error":"403 FORBIDDEN","message":"Access Denied","status":403}
+                        """);
+                        })
+                );
 
         return http.build();
     }

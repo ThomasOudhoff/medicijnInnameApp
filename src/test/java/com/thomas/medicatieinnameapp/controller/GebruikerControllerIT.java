@@ -78,7 +78,7 @@ class GebruikerControllerIT {
     }
 
     @Test
-    @WithMockUser
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("GET /api/gebruiker/{id} niet gevonden → 404")
     void getGebruiker_404() throws Exception {
         mockMvc.perform(get("/api/gebruiker/{id}", 999L))

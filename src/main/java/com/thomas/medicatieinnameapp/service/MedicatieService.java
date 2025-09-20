@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MedicatieService {
@@ -47,7 +49,7 @@ public class MedicatieService {
         Medicatie m = getByIdOr404(id);
         m.setNaamMedicijn(req.getNaam());
         m.setOmschrijving(req.getOmschrijving());
-        m.setBijsluiterUrl(req.getBijsluiterUrl()); // blijft werken; optioneel als je URL nu via 1-1 opslaat
+        m.setBijsluiterUrl(req.getBijsluiterUrl());
         return medicatieRepository.save(m);
     }
 
@@ -69,6 +71,12 @@ public class MedicatieService {
         medicatieRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
+    public Optional<MedicatieBijsluiter> getBijsluiter(Long medicatieId) {
+        return bijsluiterRepo.findById(medicatieId);
+    }
+
+    @Transactional(readOnly = true)
     public byte[] getBijsluiterFoto(Long medicatieId) {
         MedicatieBijsluiter b = bijsluiterRepo.findById(medicatieId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Geen bijsluiter"));
@@ -80,24 +88,38 @@ public class MedicatieService {
     }
 
     @Transactional
-    public void saveBijsluiterFoto(Long medicatieId, byte[] bytes) {
+    public void saveBijsluiterFoto(Long medicatieId, byte[] bytes,
+                                   String contentType, String filename, long sizeBytes) {
         if (bytes == null || bytes.length == 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Leeg bestand");
         }
         if (bytes.length > 5 * 1024 * 1024) {
             throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE, "Bestand is te groot (max 5MB)");
         }
+
         Medicatie m = getByIdOr404(medicatieId);
+
         MedicatieBijsluiter b = bijsluiterRepo.findById(medicatieId).orElseGet(() -> {
             MedicatieBijsluiter nb = new MedicatieBijsluiter();
-            nb.setMedicatie(m); // MapsId koppelt medicatie_id
+            nb.setMedicatie(m);
             return nb;
         });
+
+        String ct = (contentType == null || contentType.isBlank())
+                ? "application/octet-stream" : contentType;
+
         b.setData(bytes);
         b.setSizeBytes((long) bytes.length);
-        b.setContentType("application/octet-stream");
+        b.setContentType(ct);
+        b.setFilename(filename);
         bijsluiterRepo.save(b);
     }
+
+    @Transactional
+    public void saveBijsluiterFoto(Long medicatieId, byte[] bytes) {
+        saveBijsluiterFoto(medicatieId, bytes, null, null, bytes != null ? bytes.length : 0);
+    }
+
     @Transactional
     public void deleteBijsluiterFoto(Long medicatieId) {
         if (!bijsluiterRepo.existsById(medicatieId)) {
@@ -111,13 +133,30 @@ public class MedicatieService {
         if (url == null || url.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ongeldige URL");
         }
+        String trimmed = url.trim();
+        try {
+            java.net.URI u = java.net.URI.create(trimmed);
+            String scheme = u.getScheme();
+            if (scheme == null || !(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))) {
+                throw new IllegalArgumentException();
+            }
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ongeldige URL");
+        }
+
         Medicatie m = getByIdOr404(medicatieId);
-        MedicatieBijsluiter b = bijsluiterRepo.findById(medicatieId).orElseGet(() -> {
-            MedicatieBijsluiter nb = new MedicatieBijsluiter();
-            nb.setMedicatie(m);
-            return nb;
-        });
-        b.setUrl(url.trim());
-        bijsluiterRepo.save(b);
+
+        var optBijsluiter = bijsluiterRepo.findById(medicatieId);
+        if (optBijsluiter.isPresent()) {
+            MedicatieBijsluiter b = optBijsluiter.get();
+            b.setUrl(trimmed);
+            bijsluiterRepo.save(b);
+        } else {
+
+            m.setBijsluiterUrl(trimmed);
+        }
+
+        medicatieRepository.save(m);
     }
+
 }

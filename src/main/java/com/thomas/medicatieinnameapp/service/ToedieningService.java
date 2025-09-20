@@ -21,6 +21,7 @@ public class ToedieningService {
     private final MedicatieRepository medicatieRepo;
     private final InnameSchemaRepository schemaRepo;
 
+
     public ToedieningService(ToedieningRepository repo,
                              GebruikerRepository gebruikerRepo,
                              MedicatieRepository medicatieRepo,
@@ -98,5 +99,20 @@ public class ToedieningService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Toediening niet gevonden");
         }
         repo.deleteById(id);
+    }
+    @Transactional
+    public Toediening createForSchema(Long schemaId, ToedieningCreateRequest req) {
+        var schema = schemaRepo.findById(schemaId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Schema niet gevonden"));
+
+        Toediening t = new Toediening();
+        t.setGebruiker(schema.getGebruiker());
+        t.setMedicatie(schema.getMedicatie());
+        t.setSchemaInname(schema);
+        t.setTijdstip(req.getTijdstip());
+        t.setHoeveelheid(req.getHoeveelheid());
+        t.setOpmerking(req.getOpmerking());
+
+        return repo.save(t);
     }
 }
