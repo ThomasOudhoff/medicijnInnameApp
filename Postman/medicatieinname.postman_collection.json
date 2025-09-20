@@ -1,0 +1,1411 @@
+{
+	"info": {
+		"_postman_id": "b54f6d04-4ebe-4c9b-aa75-223ab42f29fa",
+		"name": "MedicatieinnameApp — Full E2E",
+		"description": "Gecombineerde collectie (admin + verzorger + patiënt self‑service).\nWijzigingen verwerkt: geen unlink endpoint, geen GET /api/schema/{id}, enum kanaal lowercase, multipart upload correct.\n",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "37521612"
+	},
+	"item": [
+		{
+			"name": "1 — Setup & Info",
+			"item": [
+				{
+					"name": "GET /api/gebruiker — lijst (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('200 OK', ()=>pm.response.to.have.status(200));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/gebruiker",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"gebruiker"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET /api/medicatie — lijst (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('200 OK', ()=>pm.response.to.have.status(200));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/medicatie",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicatie"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "- Sanity checks. Geen side-effects. Verwacht **200**."
+		},
+		{
+			"name": "2 — Zorgrelaties (Admin)",
+			"item": [
+				{
+					"name": "POST /api/relaties — koppel verzorger↔patiënt",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"",
+									"if (!pm.collectionVariables.get('gebruikerId')) pm.collectionVariables.set('gebruikerId','2');",
+									"if (!pm.collectionVariables.get('gebruikerId2')) pm.collectionVariables.set('gebruikerId2','3');",
+									"if (!pm.collectionVariables.get('verzorgerId')) pm.collectionVariables.set('verzorgerId','4');"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('201 or 204', ()=>pm.expect([201,204]).to.include(pm.response.code));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"verzorgerId\": \"{{verzorgerId}}\",\n  \"gebruikerId\": \"{{gebruikerId}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/relaties",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"relaties"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Koppelt `verzorgerId` ↔ `gebruikerId`. **201** nieuw / **204** als al gekoppeld."
+		},
+		{
+			"name": "3 — Medicatie (Admin)",
+			"item": [
+				{
+					"name": "POST /api/medicatie/gebruiker/{gebruikerId} — create voor patiënt1",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"",
+									"if (!pm.collectionVariables.get('gebruikerId')) pm.collectionVariables.set('gebruikerId','2');",
+									"if (!pm.collectionVariables.get('gebruikerId2')) pm.collectionVariables.set('gebruikerId2','3');",
+									"if (!pm.collectionVariables.get('verzorgerId')) pm.collectionVariables.set('verzorgerId','4');"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('201 Created', ()=>pm.response.to.have.status(201));",
+									"",
+									"const js = pm.response.json();",
+									"pm.test(\"Medicatie heeft id\", ()=>pm.expect(js).to.have.property(\"id\"));",
+									"pm.collectionVariables.set(\"medicatieId1\", js.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"naam\": \"Paracetamol 500mg\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/medicatie/gebruiker/{{gebruikerId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicatie",
+								"gebruiker",
+								"{{gebruikerId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST /api/medicatie/gebruiker/{gebruikerId2} — create voor patiënt2",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"",
+									"if (!pm.collectionVariables.get('gebruikerId')) pm.collectionVariables.set('gebruikerId','2');",
+									"if (!pm.collectionVariables.get('gebruikerId2')) pm.collectionVariables.set('gebruikerId2','3');",
+									"if (!pm.collectionVariables.get('verzorgerId')) pm.collectionVariables.set('verzorgerId','4');"
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('201 Created', ()=>pm.response.to.have.status(201));",
+									"",
+									"const js = pm.response.json();",
+									"pm.test(\"Medicatie heeft id\", ()=>pm.expect(js).to.have.property(\"id\"));",
+									"pm.collectionVariables.set(\"medicatieId2\", js.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"naam\": \"Ibuprofen 200mg\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/medicatie/gebruiker/{{gebruikerId2}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicatie",
+								"gebruiker",
+								"{{gebruikerId2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET /api/medicatie/{medicatieId1} — detail",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('200 OK', ()=>pm.response.to.have.status(200));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/medicatie/{{medicatieId1}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicatie",
+								"{{medicatieId1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET /api/medicatie/{medicatieId2} — detail",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('200 OK', ()=>pm.response.to.have.status(200));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/medicatie/{{medicatieId2}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicatie",
+								"{{medicatieId2}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Maakt medicatie voor `gebruikerId` en `gebruikerId2`. Tests zetten `medicatieId1`/`medicatieId2.`"
+		},
+		{
+			"name": "4 — Schema (Admin/Owner)",
+			"item": [
+				{
+					"name": "POST /api/medicatie/{id}/schema — create schema voor medicatieId1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('201 Created', ()=>pm.response.to.have.status(201));",
+									"",
+									"const js = pm.response.json();",
+									"pm.test(\"Schema heeft id\", ()=>pm.expect(js).to.have.property(\"id\"));",
+									"pm.collectionVariables.set(\"schemaId\", js.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tijdstip\": \"08:00:00\",\n  \"frequentie\": \"DAILY\",\n  \"hoeveelheid\": 1,\n  \"eenheid\": \"tablet\",\n  \"startDatum\": \"2025-09-20\",\n  \"eindDatum\": \"2025-10-20\",\n  \"actief\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/medicatie/{{medicatieId1}}/schema",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicatie",
+								"{{medicatieId1}}",
+								"schema"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET /api/medicatie/{id}/schema — list",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('200 OK', ()=>pm.response.to.have.status(200));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/medicatie/{{medicatieId1}}/schema",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicatie",
+								"{{medicatieId1}}",
+								"schema"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "POST maakt schema (**201**) en zet `schemaId`. GET lijst: **200**."
+		},
+		{
+			"name": "5 — Medicatie (Verzorger — gekoppeld)",
+			"item": [
+				{
+					"name": "GET /api/medicatie/{medicatieId1} — 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('200 OK', ()=>pm.response.to.have.status(200));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/medicatie/{{medicatieId1}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicatie",
+								"{{medicatieId1}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Verzorger ziet gekoppelde medicatie. Verwacht **200.**",
+			"auth": {
+				"type": "basic",
+				"basic": [
+					{
+						"key": "username",
+						"value": "{{verzorgUser}}",
+						"type": "string"
+					},
+					{
+						"key": "password",
+						"value": "{{verzorgPass}}",
+						"type": "string"
+					}
+				]
+			}
+		},
+		{
+			"name": "6 — Medicatie (Verzorger — niet gekoppeld)",
+			"item": [
+				{
+					"name": "GET /api/medicatie/{medicatieId2} — 403",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('403 Forbidden', ()=>pm.response.to.have.status(403));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/medicatie/{{medicatieId2}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicatie",
+								"{{medicatieId2}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Verzorger ziet andermans medicatie niet. Verwacht **403.**",
+			"auth": {
+				"type": "basic",
+				"basic": [
+					{
+						"key": "username",
+						"value": "{{verzorgUser}}",
+						"type": "string"
+					},
+					{
+						"key": "password",
+						"value": "{{verzorgPass}}",
+						"type": "string"
+					}
+				]
+			}
+		},
+		{
+			"name": "7 — Bijsluiter (Admin)",
+			"item": [
+				{
+					"name": "POST /api/medicatie/{id}/bijsluiter — upload (204)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('204 No Content', ()=>pm.response.to.have.status(204));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/path/to/your/demo.pdf"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/medicatie/{{medicatieId1}}/bijsluiter",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicatie",
+								"{{medicatieId1}}",
+								"bijsluiter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET /api/medicatie/{id}/bijsluiter — 200/204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('200 or 204', ()=>pm.expect([200,204]).to.include(pm.response.code));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/medicatie/{{medicatieId1}}/bijsluiter",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicatie",
+								"{{medicatieId1}}",
+								"bijsluiter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT /api/medicatie/{id}/bijsluiter-url — 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('204 No Content', ()=>pm.response.to.have.status(204));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"url\": \"https://example.com/bijsluiters/paracetamol.pdf\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/medicatie/{{medicatieId1}}/bijsluiter-url",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicatie",
+								"{{medicatieId1}}",
+								"bijsluiter-url"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE /api/medicatie/{id}/bijsluiter — 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('204 No Content', ()=>pm.response.to.have.status(204));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/medicatie/{{medicatieId1}}/bijsluiter",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicatie",
+								"{{medicatieId1}}",
+								"bijsluiter"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Upload: **multipart/form-data**, key **`file`** (File). GET: **200** (bestaat) of **204** (niet). PUT url: **204**. DELETE: **204.**"
+		},
+		{
+			"name": "8 — Toedieningen (Admin)",
+			"item": [
+				{
+					"name": "POST /api/medicatie/{id}/toedieningen — create ZONDER schema (201)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('201 Created', ()=>pm.response.to.have.status(201));",
+									"",
+									"const js = pm.response.json();",
+									"pm.test(\"Toediening heeft id\", ()=>pm.expect(js).to.have.property(\"id\"));",
+									"pm.collectionVariables.set(\"toedieningId\", js.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tijdstip\": \"2025-09-20T20:00:00\",\n  \"hoeveelheid\": 1,\n  \"opmerking\": \"Avond-inname test\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/medicatie/{{medicatieId1}}/toedieningen",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicatie",
+								"{{medicatieId1}}",
+								"toedieningen"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET /api/medicatie/{id}/toedieningen — 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('200 OK', ()=>pm.response.to.have.status(200));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/medicatie/{{medicatieId1}}/toedieningen?from={{dateFrom}}&to={{dateTo}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicatie",
+								"{{medicatieId1}}",
+								"toedieningen"
+							],
+							"query": [
+								{
+									"key": "from",
+									"value": "{{dateFrom}}"
+								},
+								{
+									"key": "to",
+									"value": "{{dateTo}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET /api/schema/{schemaId}/toedieningen — 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('200 OK', ()=>pm.response.to.have.status(200));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/schema/{{schemaId}}/toedieningen",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"schema",
+								"{{schemaId}}",
+								"toedieningen"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE /api/toedieningen/{id} — 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('204 No Content', ()=>pm.response.to.have.status(204));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/toedieningen/{{toedieningId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"toedieningen",
+								"{{toedieningId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "POST op **/medicatie/{id}/toedieningen** (zonder schema) en **/schema/{schemaId}/toedieningen** (met schema). GET filters `from/to`. DELETE: **204**."
+		},
+		{
+			"name": "9 — Toedieningen (Verzorger — gekoppeld)",
+			"item": [
+				{
+					"name": "GET /api/medicatie/{id}/toedieningen — 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('200 OK', ()=>pm.response.to.have.status(200));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/medicatie/{{medicatieId1}}/toedieningen?from={{dateFrom}}&to={{dateTo}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicatie",
+								"{{medicatieId1}}",
+								"toedieningen"
+							],
+							"query": [
+								{
+									"key": "from",
+									"value": "{{dateFrom}}"
+								},
+								{
+									"key": "to",
+									"value": "{{dateTo}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Verzorger mag gekoppelde toedieningen zien. **200**.",
+			"auth": {
+				"type": "basic",
+				"basic": [
+					{
+						"key": "username",
+						"value": "{{verzorgUser}}",
+						"type": "string"
+					},
+					{
+						"key": "password",
+						"value": "{{verzorgPass}}",
+						"type": "string"
+					}
+				]
+			}
+		},
+		{
+			"name": "10 — Toedieningen (Verzorger — niet gekoppeld)",
+			"item": [
+				{
+					"name": "GET /api/medicatie/{id}/toedieningen — 403",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('403 Forbidden', ()=>pm.response.to.have.status(403));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/medicatie/{{medicatieId2}}/toedieningen?from={{dateFrom}}&to={{dateTo}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicatie",
+								"{{medicatieId2}}",
+								"toedieningen"
+							],
+							"query": [
+								{
+									"key": "from",
+									"value": "{{dateFrom}}"
+								},
+								{
+									"key": "to",
+									"value": "{{dateTo}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Geen toegang. **403**.",
+			"auth": {
+				"type": "basic",
+				"basic": [
+					{
+						"key": "username",
+						"value": "{{verzorgUser}}",
+						"type": "string"
+					},
+					{
+						"key": "password",
+						"value": "{{verzorgPass}}",
+						"type": "string"
+					}
+				]
+			}
+		},
+		{
+			"name": "11 — Notificatie-instellingen",
+			"item": [
+				{
+					"name": "PUT /api/gebruiker/{id}/instellingen — upsert 201/200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('201/200', ()=>pm.expect([200,201]).to.include(pm.response.code));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"stilleStart\": \"22:00\",\n  \"stilleEinde\": \"07:00\",\n  \"kanaal\": \"email\",\n  \"minutenVooraf\": 30,\n  \"snoozeMinuten\": 10,\n  \"actief\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/gebruiker/{{gebruikerId}}/instellingen",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"gebruiker",
+								"{{gebruikerId}}",
+								"instellingen"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET /api/gebruiker/{id}/instellingen — 200",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('200 OK', ()=>pm.response.to.have.status(200));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/gebruiker/{{gebruikerId}}/instellingen",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"gebruiker",
+								"{{gebruikerId}}",
+								"instellingen"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE /api/gebruiker/{id}/instellingen — 204",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('204 No Content', ()=>pm.response.to.have.status(204));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/gebruiker/{{gebruikerId}}/instellingen",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"gebruiker",
+								"{{gebruikerId}}",
+								"instellingen"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "`\"kanaal\": \"email\"` (lowercase). PUT is **upsert** (**201/200**), GET **200**, DELETE **204**."
+		},
+		{
+			"name": "12.1 — Admin stap",
+			"item": [
+				{
+					"name": "ADMIN: POST /api/gebruiker — maak patiënt (rol GEBRUIKER)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('201 Created', ()=>pm.response.to.have.status(201));",
+									"",
+									"const js = pm.response.json();",
+									"pm.test(\"Gebruiker heeft id\", ()=>pm.expect(js).to.have.property(\"id\"));",
+									"pm.collectionVariables.set(\"patientId\", js.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"naam\": \"Self Service Patiënt\",\n  \"email\": \"{{patientUser}}\",\n  \"rol\": \"GEBRUIKER\",\n  \"wachtwoord\": \"{{patientPass}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/gebruiker",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"gebruiker"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "_Admin_ maakt patiënt. Daarna folder gebruikt **Basic Auth van patiënt**.  \n  \nPatiënt: voegt medicijn toe (**201**), uploadt bijsluiter (**204**), maakt schema (**201**), logt inname (**201**), zet notificaties (**201/200**).  \n  \nTests zetten `patientId`, `medicatieIdPatient`, `schemaIdPatient`.EndFragment"
+		},
+		{
+			"name": "12.2 — Patient Self‑Service",
+			"item": [
+				{
+					"name": "POST /api/medicatie/gebruiker/{patientId} — patiënt voegt medicijn toe",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('201 Created', ()=>pm.response.to.have.status(201));",
+									"pm.test('Niet 401', ()=>pm.expect(pm.response.code).to.not.equal(401));",
+									"",
+									"const js = pm.response.json();",
+									"pm.test(\"Medicatie heeft id\", ()=>pm.expect(js).to.have.property(\"id\"));",
+									"pm.collectionVariables.set(\"medicatieIdPatient\", js.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"naam\": \"Amoxicilline 500mg\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/medicatie/gebruiker/{{patientId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicatie",
+								"gebruiker",
+								"{{patientId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST /api/medicatie/{id}/bijsluiter — upload (204)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('204 No Content', ()=>pm.response.to.have.status(204));",
+									"pm.test('Niet 401', ()=>pm.expect(pm.response.code).to.not.equal(401));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/path/to/your/demo.pdf"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/medicatie/{{medicatieIdPatient}}/bijsluiter",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicatie",
+								"{{medicatieIdPatient}}",
+								"bijsluiter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST /api/medicatie/{id}/schema — patiënt maakt schema",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('201 Created', ()=>pm.response.to.have.status(201));",
+									"pm.test('Niet 401', ()=>pm.expect(pm.response.code).to.not.equal(401));",
+									"",
+									"const js = pm.response.json();",
+									"pm.test(\"Schema heeft id\", ()=>pm.expect(js).to.have.property(\"id\"));",
+									"pm.collectionVariables.set(\"schemaIdPatient\", js.id);"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tijdstip\": \"08:00:00\",\n  \"frequentie\": \"DAILY\",\n  \"hoeveelheid\": 1,\n  \"eenheid\": \"tablet\",\n  \"startDatum\": \"2025-09-20\",\n  \"eindDatum\": \"2025-10-20\",\n  \"actief\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/medicatie/{{medicatieIdPatient}}/schema",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicatie",
+								"{{medicatieIdPatient}}",
+								"schema"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET /api/medicatie/{id}/schema — controle lijst",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('200 OK', ()=>pm.response.to.have.status(200));",
+									"pm.test('Niet 401', ()=>pm.expect(pm.response.code).to.not.equal(401));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/medicatie/{{medicatieIdPatient}}/schema",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"medicatie",
+								"{{medicatieIdPatient}}",
+								"schema"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT /api/gebruiker/{patientId}/instellingen — notificaties (email)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('201/200', ()=>pm.expect([200,201]).to.include(pm.response.code));",
+									"pm.test('Niet 401', ()=>pm.expect(pm.response.code).to.not.equal(401));"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"stilleStart\": \"22:00\",\n  \"stilleEinde\": \"07:00\",\n  \"kanaal\": \"email\",\n  \"minutenVooraf\": 30,\n  \"snoozeMinuten\": 10,\n  \"actief\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/gebruiker/{{patientId}}/instellingen",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"gebruiker",
+								"{{patientId}}",
+								"instellingen"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Patiënt: voegt medicijn toe (**201**), uploadt bijsluiter (**204**), maakt schema (**201**), logt inname (**201**), zet notificaties (**201/200**).  \n  \nTests zetten `patientId`, `medicatieIdPatient`, `schemaIdPatient`",
+			"auth": {
+				"type": "basic",
+				"basic": [
+					{
+						"key": "username",
+						"value": "{{patientUser}}",
+						"type": "string"
+					},
+					{
+						"key": "password",
+						"value": "{{patientPass}}",
+						"type": "string"
+					}
+				]
+			}
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "username",
+				"value": "{{authUser}}",
+				"type": "string"
+			},
+			{
+				"key": "password",
+				"value": "{{authPass}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "authUser",
+			"value": "admin@example.com",
+			"type": "string"
+		},
+		{
+			"key": "authPass",
+			"value": "Admin123!",
+			"type": "string"
+		},
+		{
+			"key": "verzorgUser",
+			"value": "verzorger1@example.com",
+			"type": "string"
+		},
+		{
+			"key": "verzorgPass",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "gebruikerId",
+			"value": "2",
+			"type": "string"
+		},
+		{
+			"key": "gebruikerId2",
+			"value": "3",
+			"type": "string"
+		},
+		{
+			"key": "verzorgerId",
+			"value": "4",
+			"type": "string"
+		},
+		{
+			"key": "medicatieId1",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "medicatieId2",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "schemaId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "toedieningId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "patientUser",
+			"value": "patient.selfservice@example.com",
+			"type": "string"
+		},
+		{
+			"key": "patientPass",
+			"value": "Welkom123!",
+			"type": "string"
+		},
+		{
+			"key": "patientId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "medicatieIdPatient",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "schemaIdPatient",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "dateFrom",
+			"value": "2025-09-01",
+			"type": "string"
+		},
+		{
+			"key": "dateTo",
+			"value": "2025-10-20",
+			"type": "string"
+		}
+	]
+}
