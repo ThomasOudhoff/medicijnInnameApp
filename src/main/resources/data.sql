@@ -1,12 +1,13 @@
 SET FOREIGN_KEY_CHECKS = 0;
 DELETE FROM medicatie_bijsluiter;
 DELETE FROM medicaties;
-DELETE FROM verzorger_patient;
+DELETE FROM zorgrelaties;
 DELETE FROM gebruikers;
 SET FOREIGN_KEY_CHECKS = 1;
 
 ALTER TABLE gebruikers AUTO_INCREMENT = 1;
 ALTER TABLE medicaties AUTO_INCREMENT = 1000;
+ALTER TABLE zorgrelaties AUTO_INCREMENT = 1;
 
 INSERT INTO gebruikers (naam, email, wachtwoord, rol) VALUES
 ('Admin', 'admin@example.com', '{bcrypt}$2a$10$sDmxpjvPRG4tG54hxJbH.eedKqkJU72fbOQTlq1gxBJ.cLKKyR6/a', 'ADMIN'),
@@ -21,7 +22,7 @@ SET @patient2_id   = (SELECT id FROM gebruikers WHERE email='patient2@example.co
 SET @verzorger1_id = (SELECT id FROM gebruikers WHERE email='verzorger1@example.com');
 SET @verzorger2_id = (SELECT id FROM gebruikers WHERE email='verzorger2@example.com');
 
-INSERT INTO verzorger_patient (verzorger_id, patient_id) VALUES
+INSERT INTO zorgrelaties (verzorger_id, gebruiker_id) VALUES
     (@verzorger1_id, @patient1_id);
 
 INSERT INTO medicaties (naam_medicijn, omschrijving, bijsluiter_url, gebruiker_id) VALUES

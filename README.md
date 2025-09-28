@@ -42,17 +42,22 @@ Uit de seed (`data.sql`):
 ## Database & seeding
 `src/main/resources/data.sql` levert demo-gebruikers, zorgrelaties en voorbeeldmedicatie + 1 demo-bijsluiter.
 
-**Spring config (dev/demos):**
-```properties
+# --- Database (MySQL 8, lokaal) ---
+spring.datasource.url=jdbc:mysql://localhost:3306/medicijninname?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+spring.datasource.username=<user>
+spring.datasource.password=<pass>
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+# --- JPA / schema & seeding ---
+spring.jpa.hibernate.ddl-auto=update
 spring.sql.init.mode=always
 spring.jpa.defer-datasource-initialization=true
 
-spring.datasource.url=jdbc:mysql://localhost:3306/medicijneninname?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-spring.datasource.username=<user>
-spring.datasource.password=<pass>
+# --- File uploads ---
+spring.servlet.multipart.max-file-size=10MB
+spring.servlet.multipart.max-request-size=10MB
 
-spring.jpa.hibernate.ddl-auto=update
-```
+# --- PasswordEnconder ---
 PasswordEncoder is Delegating → wachtwoorden in de database hebben een {bcrypt}-prefix (seed is daarop afgestemd).
 
 **Build & run**
