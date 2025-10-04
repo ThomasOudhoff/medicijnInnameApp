@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "b54f6d04-4ebe-4c9b-aa75-223ab42f29fa",
+		"_postman_id": "4575d651-a9c3-455f-8bf2-877c49e3ff1c",
 		"name": "MedicatieinnameApp — Full E2E",
 		"description": "Gecombineerde collectie (admin + verzorger + patiënt self‑service).\nWijzigingen verwerkt: geen unlink endpoint, geen GET /api/schema/{id}, enum kanaal lowercase, multipart upload correct.\n",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",

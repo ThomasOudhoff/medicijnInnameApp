@@ -1,13 +1,24 @@
--- CHILD-tabellen eerst:
+
 DELETE FROM medicatie_bijsluiter;
 DELETE FROM toedieningen;
 DELETE FROM schema_inname;
 DELETE FROM notificatie_instellingen;
 DELETE FROM zorgrelaties;
 
--- Daarna de PARENT-tabellen:
+
 DELETE FROM medicaties;
 DELETE FROM gebruikers;
+
+SET FOREIGN_KEY_CHECKS=0;
+
+TRUNCATE TABLE zorgrelaties;
+TRUNCATE TABLE notificatie_instellingen;
+TRUNCATE TABLE toedieningen;
+TRUNCATE TABLE schema_inname;
+TRUNCATE TABLE medicaties;
+TRUNCATE TABLE gebruikers;
+
+SET FOREIGN_KEY_CHECKS=1;
 
 INSERT INTO gebruikers (naam, email, wachtwoord, rol) VALUES
                                                           ('Admin','admin@example.com','{bcrypt}$2a$10$sDmxpjvPRG4tG54hxJbH.eedKqkJU72fbOQTlq1gxBJ.cLKKyR6/a','ADMIN'),
